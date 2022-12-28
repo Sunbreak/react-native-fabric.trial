@@ -153,4 +153,16 @@ if (isNewArchitectureEnabled()) {
     libraryName = "FabricOnlyView"
     codegenJavaPackageName = "com.fabriconly"
   }
+
+  // ./gradlew :react-native-fabric-only:packageNdkReleaseLibs :react-native-fabric-only:bundlerReleaseAar
+  tasks.register("packageNdkReleaseLibs", Copy) {
+    def appProject = rootProject.allprojects.find {
+      it.plugins.hasPlugin('com.android.application')
+    }
+    dependsOn(appProject.tasks['mergeReleaseNativeLibs'])
+    // Shared libraries (.so) are copied from the merged_native_libs folder instead
+    from("${appProject.buildDir}/intermediates/merged_native_libs/release/out/lib/")
+    include("**/libreact_codegen_RN${react.libraryName.get()}Spec.so")
+    into("$buildDir/intermediates/merged_native_libs/release/out/lib/")
+  }
 }
